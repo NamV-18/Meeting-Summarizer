@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meeting Summarizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .muted { color: #666; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Meeting Summarizer</h1>
+
+  <div class="card">
+    <h3>Upload Audio</h3>
+    <input id="file" type="file" accept="audio/*" />
+    <button id="upload">Upload & Process</button>
+    <span id="status" class="muted"></span>
+  </div>
+
+  <div class="card">
+    <h3>Meetings</h3>
+    <button id="refresh">Refresh</button>
+    <div id="meetings"></div>
+  </div>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+
+    async function upload() {
+      const f = document.getElementById('file').files[0];
+      if (!f) { alert('Pick a file'); return; }
+      document.getElementById('status').textContent = 'Uploading...';
+      const form = new FormData();
+      form.append('file', f);
+      const res = await fetch(`${API}/api/meetings/upload`, { method: 'POST', body: form });
+      if (!res.ok) {
+        const t = await res.text();
+        alert('Error: ' + t);
+      }
+      document.getElementById('status').textContent = '';
+      await refresh();
+    }
+
+    async function refresh() {
+      const res = await fetch(`${API}/api/meetings`);
+      const data = await res.json();
+      const root = document.getElementById('meetings');
+      root.innerHTML = '';
+      for (const m of data) {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <div><strong>${m.filename}</strong> <span class="muted">#${m.id}</span></div>
+          <div><strong>Summary</strong>: ${m.summary || ''}</div>
+          <div><strong>Decisions</strong>:<ul>${(m.decisions||[]).map(d => `<li>${d}</li>`).join('')}</ul></div>
+          <div><strong>Action Items</strong>:<ul>${(m.action_items||[]).map(a => `<li>${a}</li>`).join('')}</ul></div>
+          <details><summary>Transcript</summary><pre>${m.transcript || ''}</pre></details>
+        `;
+        root.appendChild(el);
+      }
+    }
+
+    document.getElementById('upload').addEventListener('click', upload);
+    document.getElementById('refresh').addEventListener('click', refresh);
+    refresh();
+  </script>
+</body>
+</html>
+
+
