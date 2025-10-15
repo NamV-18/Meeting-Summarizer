@@ -14,5 +14,17 @@ Transcribe meeting audio and generate action-oriented summaries (key decisions a
 - LLM: OpenAI (default)
 - Frontend: Minimal HTML/JS uploader and results view
 
+## Setup
+
+1) Prerequisites
+- Python 3.10+
+- An OpenAI API key
+
+
+### Web UI
+1. Open the page, upload an audio file (e.g., .mp3, .wav, .m4a)
+2. Wait for processing, then view transcript, summary, and action items
+
+
 working demo link
 https://drive.google.com/file/d/1J_r7255JnkC36FjYT6OetFL34NRS2pfU/view?usp=sharing
